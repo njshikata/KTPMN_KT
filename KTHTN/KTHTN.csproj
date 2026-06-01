@@ -176,6 +176,12 @@
     <Compile Include="rohang\RoHang.Designer.cs">
       <DependentUpon>RoHang.cs</DependentUpon>
     </Compile>
+    <Compile Include="ThanhToanPhiShip\ThanhToanPhiShip.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ThanhToanPhiShip\ThanhToanPhiShip.Designer.cs">
+      <DependentUpon>ThanhToanPhiShip.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="BoLocTimKiem\BoLocTimKiem.resx">
       <DependentUpon>BoLocTimKiem.cs</DependentUpon>
     </EmbeddedResource>
@@ -202,6 +208,9 @@
     </Compile>
     <EmbeddedResource Include="rohang\RoHang.resx">
       <DependentUpon>RoHang.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ThanhToanPhiShip\ThanhToanPhiShip.resx">
+      <DependentUpon>ThanhToanPhiShip.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

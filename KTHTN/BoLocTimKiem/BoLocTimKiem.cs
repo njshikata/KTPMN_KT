@@ -179,7 +179,100 @@ namespace KTHTN.BoLocTimKiem
 
         private void button1_Click(object sender, EventArgs e)
         {
+            try
+            {
+                // =========================================================================
+                // LUỒNG 1: LƯU KẾT QUẢ LÊN GOOGLE SHEETS (GIỮ NGUYÊN TOÀN BỘ LOGIC CỦA CẬU)
+                // =========================================================================
+                string jsonPath = "Web_data_DangNhapDangKy.json";
+                string spreadsheetId = "1dKW5TttKZzsYU0wnYz_KyL1yE4PiUDe72Zl6Iaz5UOI";
 
+                var values = new List<IList<object>>();
+                foreach (DataGridViewRow row in dgvBoundary.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    // Đẩy 4 cột: Cột 6 (UI), Cột 7 (API), Cột 8 (Status), Cột 9 (Time)
+                    var rowData = new List<object> {
+                row.Cells[6].Value?.ToString() ?? "",
+                row.Cells[7].Value?.ToString() ?? "",
+                row.Cells[8].Value?.ToString() ?? "",
+                row.Cells[9].Value?.ToString() ?? ""
+            };
+                    values.Add(rowData);
+                }
+
+                // Đẩy từ cột G (Cột thứ 7 trên Excel) đến Cột J
+                var range = "BoLocTuongDuong!G2";
+                var valueRange = new ValueRange { Values = values };
+
+                var service = GetSheetsService(jsonPath);
+                var updateRequest = service.Spreadsheets.Values.Update(valueRange, spreadsheetId, range);
+                updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.USERENTERED;
+                updateRequest.Execute();
+
+                // =========================================================================
+                // LUỒNG 2: TỰ ĐỘNG XUẤT FILE REPORT OFFLINE XUỐNG THƯ MỤC CẠNH FILE .EXE
+                // =========================================================================
+                // Đường dẫn đến thư mục "ketqua" nằm cùng cấp với file .exe đang chạy
+                string folderPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ketqua");
+
+                // Nếu thư mục "ketqua" chưa tồn tại thì hệ thống tự động tạo mới
+                if (!System.IO.Directory.Exists(folderPath))
+                {
+                    System.IO.Directory.CreateDirectory(folderPath);
+                }
+
+                // Tạo tên file theo định dạng chuẩn: KetQua_Ngay_Thang_Nam_Gio_Phut_Giay.csv
+                string fileName = $"KetQua_DangNhapDangKyPhanHoachTuongDuongVaGiaTriBien_{DateTime.Now:dd_MM_yyyy_HH_mm_ss}.csv";
+                string filePath = System.IO.Path.Combine(folderPath, fileName);
+
+                // Ghi dữ liệu với Encoding.UTF8 (có BOM) để Excel mở không bị lỗi hiển thị Tiếng Việt
+                using (System.IO.StreamWriter sw = new System.IO.StreamWriter(filePath, false, Encoding.UTF8))
+                {
+                    // 1. Ghi dòng tiêu đề (Headers) lấy trực tiếp từ các cột của DataGridView của cậu
+                    List<string> headers = new List<string>();
+                    foreach (DataGridViewColumn col in dgvBoundary.Columns)
+                    {
+                        headers.Add(col.HeaderText ?? $"Cot_{col.Index}");
+                    }
+                    sw.WriteLine(string.Join(",", headers));
+
+                    // 2. Ghi toàn bộ dữ liệu các dòng hiện tại trên bảng dữ liệu
+                    foreach (DataGridViewRow row in dgvBoundary.Rows)
+                    {
+                        if (row.IsNewRow) continue;
+
+                        List<string> rowCells = new List<string>();
+                        foreach (DataGridViewCell cell in row.Cells)
+                        {
+                            string cellValue = cell.Value?.ToString() ?? "";
+
+                            // Xử lý chuẩn hóa chuỗi dữ liệu (Nếu text chứa dấu phẩy hoặc dấu nháy kép thì bọc lại để file CSV không bị vỡ cấu trúc)
+                            if (cellValue.Contains(",") || cellValue.Contains("\n") || cellValue.Contains("\""))
+                            {
+                                cellValue = "\"" + cellValue.Replace("\"", "\"\"") + "\"";
+                            }
+                            rowCells.Add(cellValue);
+                        }
+                        sw.WriteLine(string.Join(",", rowCells));
+                    }
+                }
+
+                // Hiện thông báo gom cụm cả 2 luồng lưu trữ để người dùng dễ theo dõi vị trí file cục bộ
+                if (sender != null)
+                {
+                    string thongBaoGom = $"Đã lưu và đồng bộ kết quả thành công!\n\n" +
+                                         $"1. [Cloud]: Đã đẩy dữ liệu trực tuyến lên Google Sheets.\n" +
+                                         $"2. [Local]: Đã xuất bản sao báo cáo offline tại thư mục:\n" +
+                                         $"{filePath}";
+                    MessageBox.Show(thongBaoGom, "Đồng Bộ Kết Quả", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi lưu dữ liệu hoặc xuất file: " + ex.Message, "Lỗi Hệ Thống", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void button1_napDuLieu_Click(object sender, EventArgs e)
@@ -230,6 +323,11 @@ namespace KTHTN.BoLocTimKiem
         }
 
         private void BoLocTimKiem_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_XuatBaoCaoExxcel_Click(object sender, EventArgs e)
         {
 
         }

@@ -1,7 +1,8 @@
 ﻿using KTHTN.rohang;
 using System;
 using System.Windows.Forms;
-using KTHTN.BoLocTimKiem; 
+using KTHTN.BoLocTimKiem;
+using KTHTN.ThanhToanPhiShip;
 
 namespace KTHTN
 {
@@ -41,6 +42,15 @@ namespace KTHTN
         {
             // Cú pháp: [Tên_Namespace].[Tên_Class]
             KTHTN.BoLocTimKiem.BoLocTimKiem frmBoLoc = new KTHTN.BoLocTimKiem.BoLocTimKiem();
+
+            // Lệnh Show(this) sẽ mở form mới song song
+            frmBoLoc.Show(this);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            // Cú pháp: [Tên_Namespace].[Tên_Class]
+            KTHTN.ThanhToanPhiShip.ThanhToanPhiShip frmBoLoc = new KTHTN.ThanhToanPhiShip.ThanhToanPhiShip();
 
             // Lệnh Show(this) sẽ mở form mới song song
             frmBoLoc.Show(this);
